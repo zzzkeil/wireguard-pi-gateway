@@ -1,0 +1,91 @@
+echo "Dont run the script now !"
+
+exit
+
+####
+stuff
+####
+
+sudo apt-get install raspberrypi-kernel-headers
+echo "deb http://deb.debian.org/debian/ unstable main" | sudo tee --append /etc/apt/sources.list.d/unstable.list
+sudo apt-get install dirmngr 
+sudo apt-key adv --keyserver   keyserver.ubuntu.com --recv-keys 8B48AD6246925553 
+printf 'Package: *\nPin: release a=unstable\nPin-Priority: 150\n' | sudo tee --append /etc/apt/preferences.d/limit-unstable
+sudo apt-get update
+sudo apt-get install wireguard dnsmasq
+
+
+
+
+
+####
+network
+####
+
+sudo cp /etc/sysctl.conf /etc/sysctl.conf.orig
+sudo sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
+sudo sed -i 's/#net.ipv6.conf.all.forwarding=1/net.ipv6.conf.all.forwarding=1/g' /etc/sysctl.conf
+echo "net.ipv6.conf.all.autoconf=0
+net.ipv6.conf.eth0.autoconf=0" sudo tee --append /etc/sysctl.conf > /dev/null
+
+
+sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+sudo iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+
+
+sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
+
+echo "interface=eth0
+no-dhcp-interface=wlan0
+dhcp-range=fd10:5cc1:4f4c:6f16::100,fd10:5cc1:4f4c:6f16::150,24h
+dhcp-range=192.168.200.100,192.168.200.150,24h" sudo tee --append /etc/dnsmasq.conf > /dev/null
+
+
+####
+wireguard
+####
+
+sudo mkdir /etc/wireguard/keys
+sudo chmod 700 /etc/wireguard/keys
+sudo touch /etc/wireguard/keys/clientpi
+sudo chmod 600 /etc/wireguard/keys/clientpi
+sudo wg genkey > /etc/wireguard/keys/clientpi
+sudo wg pubkey < /etc/wireguard/keys/clientpi > /etc/wireguard/keys/clientpi.pub
+
+read -p "Set the Server ipv4 (endpoint):" -e -i Your Server IP IP01
+read -p "Set the Wireguard Server Port: " -e -i 54321 wg0port
+read -p "Set the Servers PuplicKey :" -e -i Replace this with your key PK04
+read -p "Set client ipv4 without /32 :" -e -i 10.8.0.2 cipv4
+read -p "Set client ipv6 without /128 :" -e -i fd42:42:42:42::2 cipv6
+read -p "Set client DNS ipv4 :" -e -i 10.8.0.1 DNSv4
+read -p "Set client ipv6 without /128 :" -e -i fd42:42:42:42::1 DNSv6
+
+sudo echo "[Interface]
+Address = $cipv4/32
+Address = $cipv6/128
+PrivateKey = PK03
+DNS = $DNSv4, DNSv6
+[Peer]
+Endpoint = $IP01:$wg0port
+PublicKey = $PK04
+AllowedIPs = 0.0.0.0/0, ::/0
+" > /etc/wireguard/clientpi.conf
+sed -i "s@PK03@$(cat /etc/wireguard/keys/clientpi)@" /etc/wireguard/clientpi.conf
+chmod 600 /etc/wireguard/clientpi.conf
+
+
+pupkey=$(cat /etc/wireguard/keys/client0.pub)
+echo "Set your client data in to your wireguard server config"
+echo " [Peer]
+PublicKey = $pupkey
+AllowedIPs = $cipv4/32, $cipv6/128"
+
+
+
+####
+finish
+####
+systemctl enable wg-quick@wg0.service
+systemctl start wg-quick@wg0.service
+sudo systemctl restart dnsmasq
+sudo systemctl enable dnsmasq
