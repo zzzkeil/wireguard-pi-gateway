@@ -50,6 +50,19 @@ network={
     psk='$ssidpasswd'
     }" | sudo tee --append /etc/wpa_supplicant/wpa_supplicant.conf > /dev/null
 
+sudo mv /etc/network/interfaces /etc/network/interfaces.orig
+echo "auto eth0
+iface eth0 inet static
+  address 10.7.0.1
+  netmask 24
+  
+iface eth0 inet6 static
+  address fd00:10:7:0::1
+  netmask 64
+  
+allow-hotplug wlan0
+iface wlan0 inet dhcp
+iface wlan0 inet6 dhcp" | sudo tee --append /etc/network/interfaces > /dev/null
 
 
 sudo cp /etc/sysctl.conf /etc/sysctl.conf.orig
@@ -70,27 +83,22 @@ sudo bash -c "ip6tables-save > /etc/ip6tables.rules"
 
 sudo mv /etc/dhcpcd.conf /etc/dhcpcd.conf.orig
 echo "
-persistent
-option rapid_commit
-option classless_static_routes
-option ntp_servers
-option interface_mtu
-require dhcp_server_identifier
-slaac private
-
-interface eth0
-static ip_address=10.7.0.1/24
-static ip6_address=fd00:10:7:0::1/64
-#static routers=$DNSv4
-static domain_name_servers=$DNSv4 $DNSv6" | sudo tee --append /etc/dhcpcd.conf > /dev/null
+denyinterfaces eth0
+" | sudo tee --append /etc/dhcpcd.conf > /dev/null
 
 sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
 
-echo "interface=eth0
+echo "dhcp-authoritative
+interface=eth0
 no-dhcp-interface=wlan0
 enable-ra
+listen-address=10.7.0.1
 dhcp-range=eth0,fd00:10:7:0::2,fd00:10:7:0::52,24h
-dhcp-range=eth0,10.7.0.2,10.7.0.52,24h" | sudo tee --append /etc/dnsmasq.conf > /dev/null
+dhcp-range=eth0,10.7.0.2,10.7.0.52,24h
+read-ethers
+bogus-priv
+domain-needed
+dhcp-option=option:dns-server,$DNSv4,$DNSv6" | sudo tee --append /etc/dnsmasq.conf > /dev/null
 
 
 ####
@@ -99,10 +107,10 @@ dhcp-range=eth0,10.7.0.2,10.7.0.52,24h" | sudo tee --append /etc/dnsmasq.conf > 
 
 sudo mkdir /etc/wireguard/keys
 sudo chmod 700 /etc/wireguard/keys
-sudo touch /etc/wireguard/keys/clientpi
-sudo chmod 600 /etc/wireguard/keys/clientpi
-sudo wg genkey > /etc/wireguard/keys/clientpi
-sudo wg pubkey < /etc/wireguard/keys/clientpi > /etc/wireguard/keys/clientpi.pub
+sudo touch /etc/wireguard/keys/wg0
+sudo chmod 600 /etc/wireguard/keys/wg0
+sudo wg genkey > /etc/wireguard/keys/wg0
+sudo wg pubkey < /etc/wireguard/keys/wg0 > /etc/wireguard/keys/wg0.pub
 
 echo "[Interface]
 Address = $cipv4/32
@@ -114,15 +122,15 @@ DNS = $DNSv4, DNSv6
 Endpoint = $IP01:$wg0port
 PublicKey = $PK04
 AllowedIPs = 0.0.0.0/0, ::/0
-" | sudo tee --append /etc/wireguard/clientpi.conf > /dev/null
-sudo sed -i "s@PK03@$(cat /etc/wireguard/keys/clientpi)@" /etc/wireguard/clientpi.conf
-chmod 600 /etc/wireguard/clientpi.conf
+" | sudo tee --append /etc/wireguard/wg0.conf > /dev/null
+sudo sed -i "s@PK03@$(cat /etc/wireguard/keys/wg0)@" /etc/wireguard/wg0.conf
+chmod 600 /etc/wireguard/wg0.conf
 
 echo
 echo
 echo "########################################################################"
 echo
-pupkey=$(cat /etc/wireguard/keys/clientpi.pub)
+pupkey=$(cat /etc/wireguard/keys/wg0.pub)
 echo "Set your client data in to your wireguard server config :"
 echo
 echo "[Peer]
@@ -138,8 +146,8 @@ echo
 ####
 #finish
 ####
-sudo systemctl enable wg-quick@clientpi.service
-sudo systemctl start wg-quick@clientpi.service
+sudo systemctl enable wg-quick@wg0.service
+sudo systemctl start wg-quick@wg0.service
 sudo systemctl restart dnsmasq
 sudo systemctl enable dnsmasq
 sudo service networking restart
