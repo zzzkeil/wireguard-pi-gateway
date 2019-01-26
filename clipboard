@@ -62,17 +62,17 @@ slaac private
 
 interface eth0
 static ip_address=10.7.0.1/24
-static ip6_address=fd10:7:0:1::a1/64
+static ip6_address=fd00:10:7:0::1/64
 static routers=127.0.0.1
 static domain_name_servers=$DNSv4 $DNSv6" | sudo tee --append /etc/dhcpcd.conf > /dev/null
 
 
 sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
 
-echo "#interface=eth0
-no-dhcp-interface=wlan0,eth0
-dhcp-range=fd10:5cc1:4f4c:6f16::100,fd10:5cc1:4f4c:6f16::150,24h
-dhcp-range=192.168.200.100,192.168.200.150,24h" | sudo tee --append /etc/dnsmasq.conf > /dev/null
+echo "interface=eth0
+no-dhcp-interface=wlan0
+dhcp-range=fd00:10:7:0::2,fd00:10:7:0::52,24h
+dhcp-range=10.7.0.2,10.7.0.52,24h" | sudo tee --append /etc/dnsmasq.conf > /dev/null
 
 
 ####
