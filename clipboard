@@ -23,8 +23,8 @@ echo
 echo
 echo "Setup your WiFi"
 echo
-read -p "WiFi SSID (set in " ") :  " -e -i "Wlanname" ssid
-read -p "WiFi Password (set in " ") :  " -e -i "password" ssidpasswd
+read -p "WiFi SSID  :  " -e -i "Wlanname" ssid
+read -p "WiFi Password  :  " -e -i "password" ssidpasswd
 echo
 echo
 
