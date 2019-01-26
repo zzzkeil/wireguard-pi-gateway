@@ -23,8 +23,8 @@ echo
 echo
 echo "Setup your WiFi"
 echo
-read -p "WiFi SSID  :  " -e -i "Wlanname" ssid
-read -p "WiFi Password  :  " -e -i "password" ssidpasswd
+read -p "WiFi SSID  :  " -e -i Wlanname ssid
+read -p "WiFi Password  :  " -e -i password ssidpasswd
 echo
 echo
 
@@ -92,11 +92,7 @@ static ip6_address=fd00:10:7:0::1/64
 #static routers=$DNSv4
 static domain_name_servers=$DNSv4 $DNSv6" | sudo tee --append /etc/dhcpcd.conf > /dev/null
 
-sudo cp /etc/network/interfaces /etc/network/interfaces.orig
-echo "source-directory /etc/network/interfaces.d
-auto wlan
-pre-up iptables-restore < /etc/iptables.rules
-pre-up ip6tables-restore < /etc/ip6tables.rules" | sudo tee --append /etc/network/interfaces > /dev/null
+
 
 sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
 
