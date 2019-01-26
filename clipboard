@@ -87,7 +87,7 @@ slaac private
 interface eth0
 static ip_address=10.7.0.1/24
 static ip6_address=fd00:10:7:0::1/64
-static routers=127.0.0.1
+static routers=10.7.0.1
 static domain_name_servers=$DNSv4 $DNSv6" | sudo tee --append /etc/dhcpcd.conf > /dev/null
 
 
