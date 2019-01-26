@@ -32,7 +32,7 @@ echo
 ####
 #stuff
 ####
-
+sudo apt-get update && sudo apt-get upgrade -y
 sudo apt-get install raspberrypi-kernel-headers -y
 echo "deb http://deb.debian.org/debian/ unstable main" | sudo tee --append /etc/apt/sources.list.d/unstable.list
 sudo apt-get install dirmngr -y
@@ -50,13 +50,13 @@ sudo apt-get install wireguard dnsmasq -y
 ####
 
 sudo mv /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf.orig
-echo '
+echo "
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 network={
-    ssid="$ssid"
-    psk="$ssidpasswd"
-    }' | sudo tee --append /etc/wpa_supplicant/wpa_supplicant.conf > /dev/null
+    ssid=""$ssid""
+    psk=""$ssidpasswd""
+    }" | sudo tee --append /etc/wpa_supplicant/wpa_supplicant.conf > /dev/null
 
 
 
@@ -115,6 +115,7 @@ Address = $cipv4/32
 Address = $cipv6/128
 PrivateKey = PK03
 DNS = $DNSv4, DNSv6
+
 [Peer]
 Endpoint = $IP01:$wg0port
 PublicKey = $PK04
