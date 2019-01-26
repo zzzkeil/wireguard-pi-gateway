@@ -50,13 +50,13 @@ sudo apt-get install wireguard dnsmasq -y
 ####
 
 sudo mv /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf.orig
-echo "
+echo '
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 network={
-    ssid=""$ssid""
-    psk=""$ssidpasswd""
-    }" | sudo tee --append /etc/wpa_supplicant/wpa_supplicant.conf > /dev/null
+    ssid="$ssid"
+    psk="$ssidpasswd"
+    }' | sudo tee --append /etc/wpa_supplicant/wpa_supplicant.conf > /dev/null
 
 
 
@@ -130,7 +130,7 @@ echo
 pupkey=$(cat /etc/wireguard/keys/clientpi.pub)
 echo "Set your client data in to your wireguard server config :"
 echo
-echo " [Peer]
+echo "[Peer]
 PublicKey = $pupkey
 AllowedIPs = $cipv4/32, $cipv6/128"
 echo
@@ -147,3 +147,4 @@ sudo systemctl enable wg-quick@clientpi.service
 sudo systemctl start wg-quick@clientpi.service
 sudo systemctl restart dnsmasq
 sudo systemctl enable dnsmasq
+sudo service networking restart
