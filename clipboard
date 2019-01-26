@@ -23,8 +23,8 @@ echo
 echo
 echo "Setup your WiFi"
 echo
-read -p "WiFi SSID  :  " -e -i Wlanname ssid
-read -p "WiFi Password :  " -e -i password ssidpasswd
+read -p "WiFi SSID (set in " ") :  " -e -i "Wlanname" ssid
+read -p "WiFi Password (set in " ") :  " -e -i "password" ssidpasswd
 echo
 echo
 
@@ -54,8 +54,8 @@ echo "
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 network={
-    ssid=""$ssid""
-    psk=""$ssidpasswd""
+    ssid=$ssid
+    psk=$ssidpasswd
     }" | sudo tee --append /etc/wpa_supplicant/wpa_supplicant.conf > /dev/null
 
 
@@ -78,8 +78,6 @@ sudo bash -c "ip6tables-save > /etc/ip6tables.rules"
 
 sudo mv /etc/dhcpcd.conf /etc/dhcpcd.conf.orig
 echo "
-wireguardpi
-clientid
 persistent
 option rapid_commit
 option classless_static_routes
@@ -87,21 +85,18 @@ option ntp_servers
 option interface_mtu
 require dhcp_server_identifier
 slaac private
-ip route add 10.8.0.0/24 via 10.7.0.1
 
 interface eth0
 static ip_address=10.7.0.1/24
 static ip6_address=fd00:10:7:0::1/64
-static routers=$DNSv4
+#static routers=$DNSv4
 static domain_name_servers=$DNSv4 $DNSv6" | sudo tee --append /etc/dhcpcd.conf > /dev/null
 
 sudo cp /etc/network/interfaces /etc/network/interfaces.orig
 echo "source-directory /etc/network/interfaces.d
-
 auto wlan
 pre-up iptables-restore < /etc/iptables.rules
 pre-up ip6tables-restore < /etc/ip6tables.rules" | sudo tee --append /etc/network/interfaces > /dev/null
-
 
 sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
 
