@@ -74,7 +74,7 @@ sed -i "s@PK03@$(cat /etc/wireguard/keys/clientpi)@" /etc/wireguard/clientpi.con
 chmod 600 /etc/wireguard/clientpi.conf
 
 
-pupkey=$(cat /etc/wireguard/keys/client0.pub)
+pupkey=$(cat /etc/wireguard/keys/clientpi.pub)
 echo "Set your client data in to your wireguard server config"
 echo " [Peer]
 PublicKey = $pupkey
