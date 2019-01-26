@@ -48,6 +48,24 @@ sudo iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
 sudo iptables -A FORWARD -i wg0 -o wg0 -m conntrack --ctstate NEW -j ACCEPT
 
 
+sudo mv /etc/dhcpcd.conf /etc/dhcpcd.conf.orig
+echo "
+wireguardpi
+clientid
+persistent
+option rapid_commit
+option classless_static_routes
+option ntp_servers
+option interface_mtu
+require dhcp_server_identifier
+slaac private
+
+interface eth0
+static ip_address=10.7.0.1/24
+static ip6_address=fd10:7:0:1::a1/64
+static routers=127.0.0.1
+static domain_name_servers=$DNSv4 $DNSv6" | sudo tee --append /etc/dhcpcd.conf > /dev/null
+
 
 sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
 
@@ -86,7 +104,8 @@ echo
 echo "########################################################################"
 echo
 pupkey=$(cat /etc/wireguard/keys/clientpi.pub)
-echo "Set your client data in to your wireguard server config"
+echo "Set your client data in to your wireguard server config :"
+echo
 echo " [Peer]
 PublicKey = $pupkey
 AllowedIPs = $cipv4/32, $cipv6/128"
@@ -100,7 +119,7 @@ echo
 ####
 #finish
 ####
-systemctl enable wg-quick@wg0.service
-systemctl start wg-quick@wg0.service
+sudo systemctl enable wg-quick@clientpi.service
+sudo systemctl start wg-quick@clientpi.service
 sudo systemctl restart dnsmasq
 sudo systemctl enable dnsmasq
