@@ -65,11 +65,13 @@ sudo ip6tables -A FORWARD -i wg0 -o wg0 -m conntrack --ctstate NEW -j ACCEPT
 sudo bash -c "iptables-save > /etc/iptables.rules"
 sudo bash -c "ip6tables-save > /etc/ip6tables.rules"
 
-
 sudo mv /etc/default/isc-dhcp-server /etc/default/isc-dhcp-server.orig
-echo 'INTERFACES="eth0"' | sudo tee --append /etc/default/isc-dhcp-server > /dev/null
+echo 'INTERFACESv4="eth0"' | sudo tee --append /etc/default/isc-dhcp-server > /dev/null
+sudo mv /etc/default/isc-dhcp-server /etc/default/isc-dhcp-server6
+echo 'INTERFACESv6="eth0"' | sudo tee --append /etc/default/isc-dhcp-server6 > /dev/null
 
-sudo mv /etc/dhcpcd.conf /etc/dhcpcd.conf.orig
+
+sudo mv  /etc/dhcpcd.conf.orig
 echo "
 authoritative;
 default-lease-time 86400;
@@ -82,22 +84,24 @@ static ip6_address=fd00:10:7:0::1/64
 static routers=10.7.0.1
 #static routers=$DNSv4
 static domain_name_servers=$DNSv4 $DNSv6
+" | sudo tee --append /etc/dhcpcd.conf > /dev/null
 
-subnet 10.7.0.0/24 {
+
+sudo mv /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf.orig
+echo "subnet 10.7.0.0 netmask 255.255.255.0 {
   range 10.7.0.2 10.7.0.52;
   option routers 10.7.0.1;
   option domain-name-servers 10.7.0.1;
   option domain-name "local";
-}
+}" | sudo tee --append /etc/dhcp/dhcpd.conf > /dev/null
 
+
+sudo mv /etc/dhcp/dhcpd6.conf /etc/dhcp/dhcpd6.conf.orig
 subnet6 fd00:10:7:0::/64 {
         range6 fd00:10:7:0::2 fd00:10:7:0::52;
         option dhcp6.name-servers fd00:10:7:0::1;
         option dhcp6.domain-search "local";
-}
-" | sudo tee --append /etc/dhcpcd.conf > /dev/null
-
-
+}" | sudo tee --append /etc/dhcp/dhcpd6.conf > /dev/null
 
 
 ####
@@ -147,6 +151,8 @@ echo
 ####
 sudo systemctl enable wg-quick@wg0.service
 sudo systemctl start wg-quick@wg0.service
-sudo systemctl restart dnsmasq
-sudo systemctl enable dnsmasq
+sudo systemctl restart isc-dhcp-server
+sudo systemctl restart isc-dhcp-server6
+sudo systemctl enable isc-dhcp-server
+sudo systemctl enable isc-dhcp-server6
 sudo service networking restart
