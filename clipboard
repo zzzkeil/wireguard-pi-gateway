@@ -46,23 +46,9 @@ echo "
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 network={
-    ssid='$ssid'
-    psk='$ssidpasswd'
+    ssid="${ssid}"
+    psk="${ssidpasswd}"
     }" | sudo tee --append /etc/wpa_supplicant/wpa_supplicant.conf > /dev/null
-
-sudo mv /etc/network/interfaces /etc/network/interfaces.orig
-echo "auto eth0
-iface eth0 inet static
-  address 10.7.0.1
-  netmask 24
-  
-iface eth0 inet6 static
-  address fd00:10:7:0::1
-  netmask 64
-  
-allow-hotplug wlan0
-iface wlan0 inet dhcp
-iface wlan0 inet6 dhcp" | sudo tee --append /etc/network/interfaces > /dev/null
 
 
 sudo cp /etc/sysctl.conf /etc/sysctl.conf.orig
@@ -93,12 +79,14 @@ interface=eth0
 no-dhcp-interface=wlan0
 enable-ra
 listen-address=10.7.0.1
+listen-address=fd00:10:7:0::1
 dhcp-range=eth0,fd00:10:7:0::2,fd00:10:7:0::52,24h
 dhcp-range=eth0,10.7.0.2,10.7.0.52,24h
 read-ethers
 bogus-priv
 domain-needed
-dhcp-option=option:dns-server,$DNSv4,$DNSv6" | sudo tee --append /etc/dnsmasq.conf > /dev/null
+dhcp-option=option:dns-server,$DNSv4,$DNSv6
+dhcp-option=option:router,10.7.0.1,fd00:10:7:0::1" | sudo tee --append /etc/dnsmasq.conf > /dev/null
 
 
 ####
