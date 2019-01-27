@@ -8,8 +8,8 @@ echo
 read -p "Set the Server ipv4 (endpoint) :  " -e -i ServerIP IP01
 read -p "Set the Wireguard Server Port :  " -e -i 54321 wg0port
 read -p "Set the Servers PuplicKey :  " -e -i ServerPupKey PK04
-read -p "Set client ipv4 without /32 :  " -e -i 10.8.0.2 cipv4
-read -p "Set client ipv6 without /128 :  " -e -i fd42:42:42:42::2 cipv6
+read -p "Set client ipv4 without /32 :  " -e -i 10.8.0.3 cipv4
+read -p "Set client ipv6 without /128 :  " -e -i fd42:42:42:42::3 cipv6
 read -p "Set client DNS ipv4 :  " -e -i 10.8.0.1 DNSv4
 read -p "Set client DNS ipv6 :  " -e -i fd42:42:42:42::1 DNSv6
 echo
@@ -19,7 +19,6 @@ echo
 echo
 echo "Setup your WiFi"
 echo
-##### Not working this way will not set the " in echo  line 54,55
 read -p "WiFi SSID  :  " -e -i Wlanname ssid
 read -p "WiFi Password  :  " -e -i password ssidpasswd
 echo
@@ -41,14 +40,13 @@ sudo apt-get install wireguard dnsmasq -y
 ####
 #network 
 ####
-sudo mv /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf.orig
-echo "
+echo '
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 network={
-    ssid="${ssid}"
-    psk="${ssidpasswd}"
-    }" | sudo tee --append /etc/wpa_supplicant/wpa_supplicant.conf > /dev/null
+    ssid="'"${ssid}"'"
+    psk="'"${ssidpasswd}"'"
+    }' | sudo tee --append /etc/wpa_supplicant/wpa_supplicant.conf > /dev/null
 
 
 sudo cp /etc/sysctl.conf /etc/sysctl.conf.orig
