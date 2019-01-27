@@ -1,5 +1,5 @@
 # wireguard-pi-gateway
-## Client > Raspberry Pi > Wireguard Server > Internet
+## Client <-> Raspberry Pi <-> Wireguard Server <-> Internet
 
 ### Raspberry pi:
 
