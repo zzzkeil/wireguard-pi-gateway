@@ -68,9 +68,7 @@ sudo mv /etc/dhcpcd.conf /etc/dhcpcd.conf.orig
 echo "
 interface eth0
 static ip_address=10.7.0.1/24
-static ip6_address=fd00:10:7:0::1/64
-static routers=10.7.0.1
-#static routers=$DNSv4
+static ip6_address=fd00:10:7:1::1/64
 static domain_name_servers=$DNSv4 $DNSv6
 " | sudo tee --append /etc/dhcpcd.conf > /dev/null
 
@@ -78,14 +76,15 @@ sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
 echo "interface=eth0
 no-dhcp-interface=wlan0
 enable-ra
+listen-address=127.0.0.1
 listen-address=10.7.0.1
-listen-address=fd00:10:7:0::1
-dhcp-range=fd00:10:7:0::2,fd00:10:7:0::52,24h
+listen-address=::1
+listen-address=fd00:10:7:1::1
+dhcp-range=fd00:10:7:1::2,fd00:10:7:1::52,24h
 dhcp-range=10.7.0.2,10.7.0.52,24h
 dhcp-option=option:dns-server,$DNSv4
 dhcp-option=option6:dns-server,[$DNSv6]
 dhcp-option=option:router,10.7.0.1
-dhcp-option=option6:router,fd00:10:7:0::1
 bogus-priv
 no-resolv
 no-poll
