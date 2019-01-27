@@ -97,7 +97,7 @@ echo "subnet 10.7.0.0 netmask 255.255.255.0 {
 
 
 sudo mv /etc/dhcp/dhcpd6.conf /etc/dhcp/dhcpd6.conf.orig
-subnet6 fd00:10:7:0::/64 {
+echo "subnet6 fd00:10:7:0::/64 {
         range6 fd00:10:7:0::2 fd00:10:7:0::52;
         option dhcp6.name-servers fd00:10:7:0::1;
         option dhcp6.domain-search "local";
