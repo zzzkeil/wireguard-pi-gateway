@@ -26,6 +26,8 @@ echo
 
 ####
 sudo apt update && sudo apt upgrade -y
+sudo echo iptables-persistent iptables-persistent/autosave_v4 boolean true | sudo debconf-set-selections
+sudo echo iptables-persistent iptables-persistent/autosave_v4 boolean true | sudo debconf-set-selections
 sudo apt install dirmngr raspberrypi-kernel-headers dnsmasq iptables-persistent -y
 echo "deb http://deb.debian.org/debian/ unstable main" | sudo tee --append /etc/apt/sources.list.d/unstable.list
 sudo apt-key adv --keyserver   keyserver.ubuntu.com --recv-keys 8B48AD6246925553 
