@@ -1,6 +1,10 @@
 # wireguard-pi-gateway
 ## Client <-> Raspberry Pi <-> Wireguard Server <-> Internet
 
+### setup_v01.sh --> just worked  but has no secure iptables,
+and no second script for just change the Wifi network
+
+
 ### Raspberry pi:
 
 #### eth0 as dhcp server and gateway for a connected client ( or clients )
