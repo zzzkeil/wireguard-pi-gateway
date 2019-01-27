@@ -141,3 +141,4 @@ echo
 sudo systemctl enable wg-quick@wg0.service
 sudo systemctl start dnsmasq
 echo "reboot your system now"
+echo "check if you need to change your client network settings"
