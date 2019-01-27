@@ -34,7 +34,7 @@ sudo apt-get install dirmngr -y
 sudo apt-key adv --keyserver   keyserver.ubuntu.com --recv-keys 8B48AD6246925553 
 printf 'Package: *\nPin: release a=unstable\nPin-Priority: 150\n' | sudo tee --append /etc/apt/preferences.d/limit-unstable
 sudo apt-get update
-sudo apt-get install wireguard dnsmasq -y
+sudo apt-get install wireguard isc-dhcp-server -y
 
 
 ####
@@ -65,26 +65,39 @@ sudo ip6tables -A FORWARD -i wg0 -o wg0 -m conntrack --ctstate NEW -j ACCEPT
 sudo bash -c "iptables-save > /etc/iptables.rules"
 sudo bash -c "ip6tables-save > /etc/ip6tables.rules"
 
+
+sudo mv /etc/default/isc-dhcp-server /etc/default/isc-dhcp-server.orig
+echo 'INTERFACES="eth0"' | sudo tee --append /etc/default/isc-dhcp-server > /dev/null
+
 sudo mv /etc/dhcpcd.conf /etc/dhcpcd.conf.orig
 echo "
-denyinterfaces eth0
+authoritative;
+default-lease-time 86400;
+max-lease-time 86400;
+slaac private;
+
+interface eth0
+static ip_address=10.7.0.1/24
+static ip6_address=fd00:10:7:0::1/64
+static routers=10.7.0.1
+#static routers=$DNSv4
+static domain_name_servers=$DNSv4 $DNSv6
+
+subnet 10.7.0.0/24 {
+  range 10.7.0.2 10.7.0.52;
+  option routers 10.7.0.1;
+  option domain-name-servers 10.7.0.1;
+  option domain-name "local";
+}
+
+subnet6 fd00:10:7:0::/64 {
+        range6 fd00:10:7:0::2 fd00:10:7:0::52;
+        option dhcp6.name-servers fd00:10:7:0::1;
+        option dhcp6.domain-search "local";
+}
 " | sudo tee --append /etc/dhcpcd.conf > /dev/null
 
-sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
 
-echo "dhcp-authoritative
-interface=eth0
-no-dhcp-interface=wlan0
-enable-ra
-listen-address=10.7.0.1
-listen-address=fd00:10:7:0::1
-dhcp-range=eth0,fd00:10:7:0::2,fd00:10:7:0::52,24h
-dhcp-range=eth0,10.7.0.2,10.7.0.52,24h
-read-ethers
-bogus-priv
-domain-needed
-dhcp-option=option:dns-server,$DNSv4,$DNSv6
-dhcp-option=option:router,10.7.0.1,fd00:10:7:0::1" | sudo tee --append /etc/dnsmasq.conf > /dev/null
 
 
 ####
