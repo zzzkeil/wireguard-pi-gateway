@@ -56,13 +56,15 @@ net.ipv6.conf.eth0.autoconf=0" | sudo tee --append /etc/sysctl.conf > /dev/null
 
 sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 sudo iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+sudo iptables -t nat -A POSTROUTING -o wg0 -j MASQUERADE
 sudo iptables -A FORWARD -i wg0 -o wg0 -m conntrack --ctstate NEW -j ACCEPT
 sudo ip6tables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 sudo ip6tables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+sudo ip6tables -t nat -A POSTROUTING -o wg0 -j MASQUERADE
 sudo ip6tables -A FORWARD -i wg0 -o wg0 -m conntrack --ctstate NEW -j ACCEPT
 sudo bash -c "iptables-save > /etc/iptables.rules"
 sudo bash -c "ip6tables-save > /etc/ip6tables.rules"
-
+##### zu neustart noch einspielen
 
 
 sudo mv /etc/dhcpcd.conf /etc/dhcpcd.conf.orig
@@ -86,10 +88,7 @@ dhcp-range=10.7.0.2,10.7.0.52,24h
 dhcp-option=option:dns-server,$DNSv4
 dhcp-option=option6:dns-server,[$DNSv6]
 dhcp-option=option:router,10.7.0.1
-bogus-priv
-no-resolv
-no-poll
-no-hosts"  | sudo tee --append /etc/dnsmasq.conf > /dev/null
+"  | sudo tee --append /etc/dnsmasq.conf > /dev/null
 
 
 ####
