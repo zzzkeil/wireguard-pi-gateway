@@ -27,13 +27,12 @@ echo
 ####
 #stuff
 ####
-sudo apt-get update && sudo apt-get upgrade -y
-sudo apt-get install raspberrypi-kernel-headers -y
 echo "deb http://deb.debian.org/debian/ unstable main" | sudo tee --append /etc/apt/sources.list.d/unstable.list
-sudo apt-get install dirmngr -y
 sudo apt-key adv --keyserver   keyserver.ubuntu.com --recv-keys 8B48AD6246925553 
 printf 'Package: *\nPin: release a=unstable\nPin-Priority: 150\n' | sudo tee --append /etc/apt/preferences.d/limit-unstable
-sudo apt-get update
+sudo apt-get update && sudo apt-get upgrade -y
+sudo apt-get install raspberrypi-kernel-headers -y
+sudo apt-get install dirmngr -y
 sudo apt-get install wireguard isc-dhcp-server -y
 
 
@@ -71,7 +70,7 @@ sudo mv /etc/default/isc-dhcp-server /etc/default/isc-dhcp-server6
 echo 'INTERFACESv6="eth0"' | sudo tee --append /etc/default/isc-dhcp-server6 > /dev/null
 
 
-sudo mv  /etc/dhcpcd.conf.orig
+sudo mv /etc/dhcpcd.conf /etc/dhcpcd.conf.orig
 echo "
 authoritative;
 default-lease-time 86400;
