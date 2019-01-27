@@ -32,6 +32,7 @@ sudo apt-key adv --keyserver   keyserver.ubuntu.com --recv-keys 8B48AD6246925553
 printf 'Package: *\nPin: release a=unstable\nPin-Priority: 150\n' | sudo tee --append /etc/apt/preferences.d/limit-unstable
 sudo apt update
 sudo apt install wireguard -y
+sudo systemctl stop dnsmasq
 
 
 ####
@@ -137,5 +138,6 @@ echo
 #finish
 ####
 sudo systemctl enable wg-quick@wg0.service
+sudo systemctl start dnsmasq
 
 
