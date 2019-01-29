@@ -32,7 +32,7 @@ echo
 echo
 echo "If your private network is a WiFi AP, input the interface"
 echo
-read -p "private network WiFi interface :  " -e -i noiface aphost
+read -p "private network WiFi interface :  " -e -i $ifacepriv aphost
 read -p "WiFi interface SSID :  " -e -i nossid yssid
 read -p "your password for SSID :  " -e -i No.p4ss.WD2 ywpass
 echo
@@ -48,8 +48,8 @@ echo
 read -p "Set the Server ipv4 (endpoint) :  " -e -i ServerIP IP01
 read -p "Set the Wireguard Server Port :  " -e -i 54321 wg0port
 read -p "Set the Servers PuplicKey :  " -e -i ServerPupKey PK04
-read -p "Set client ipv4 without /32 :  " -e -i 10.8.0.3 cipv4
-read -p "Set client ipv6 without /128 :  " -e -i fd42:42:42:42::3 cipv6
+read -p "Set client ipv4 without /32 :  " -e -i 10.8.0.6 cipv4
+read -p "Set client ipv6 without /128 :  " -e -i fd42:42:42:42::6 cipv6
 read -p "Set client DNS ipv4 :  " -e -i 10.8.0.1 DNSv4
 read -p "Set client DNS ipv6 :  " -e -i fd42:42:42:42::1 DNSv6
 echo
