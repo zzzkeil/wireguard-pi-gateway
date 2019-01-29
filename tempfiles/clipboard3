@@ -83,6 +83,7 @@ network={
     psk="'"${ssidpasswd}"'"
     }' | sudo tee --append /etc/wpa_supplicant/wpa_supplicant.conf > /dev/null
 
+
 #######
 echo "
 interface=$aphost
@@ -127,6 +128,7 @@ sudo ip6tables-save > /etc/iptables/rules.v6
 sudo mv /etc/dhcpcd.conf /etc/dhcpcd.conf.orig
 echo "
 interface $ifacepriv
+denyinterfaces $ifacepup
 static ip_address=10.7.0.1/24
 static ip6_address=fd00:10:7:1::1/64
 static domain_name_servers=$DNSv4 $DNSv6
