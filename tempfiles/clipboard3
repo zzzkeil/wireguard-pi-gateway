@@ -129,6 +129,7 @@ sudo mv /etc/dhcpcd.conf /etc/dhcpcd.conf.orig
 echo "
 interface $ifacepriv
 denyinterfaces $ifacepup
+nohook wpa_supplicant
 static ip_address=10.7.0.1/24
 static ip6_address=fd00:10:7:1::1/64
 static domain_name_servers=$DNSv4 $DNSv6
