@@ -86,6 +86,10 @@ network={
 
 #######
 echo "
+DAEMON_CONF="/etc/hostapd/hostapd.conf"
+" | sudo tee --append /etc/default/hostapd > /dev/null
+#######
+echo "
 interface=$aphost
 #driver=yourchoice
 ssid=$yssid
@@ -102,7 +106,6 @@ wpa_pairwise=TKIP
 rsn_pairwise=CCMP
 " | sudo tee --append /etc/hostapd/hostapd.conf > /dev/null
 #######
-
 
 
 sudo cp /etc/sysctl.conf /etc/sysctl.conf.orig
