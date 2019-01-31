@@ -40,8 +40,8 @@ echo
 echo
 echo "Setup puplic network WiFi access"
 echo
-read -p "WiFi SSID  :  " -e -i Wlanname ssid
-read -p "WiFi Password  :  " -e -i password ssidpasswd
+read -p "WiFi SSID  :  " -e -i Puplic-WiFi.AP ssid
+read -p "WiFi Password  :  " -e -i Puplicpasswd ssidpasswd
 echo
 echo
 echo "Setup wireguard"
@@ -141,7 +141,7 @@ static domain_name_servers=$DNSv4 $DNSv6
 
 sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
 echo "interface=$ifacepriv
-no-dhcp-interface=$ifacepup $ifacenouse
+no-dhcp-interface=$ifacepup,$ifacenouse
 enable-ra
 listen-address=127.0.0.1
 listen-address=10.7.0.1
