@@ -28,6 +28,7 @@ echo
 echo
 read -p "Set your private network interface :  " -e -i eth0 ifacepriv
 read -p "Set the puplic network interface :  " -e -i wlan0 ifacepup
+read -p "Set the unused network interface or blank :  " -e -i wlan1 ifacenouse
 echo
 echo
 echo "If your private network is a WiFi AP, input the interface"
@@ -131,7 +132,7 @@ sudo ip6tables-save > /etc/iptables/rules.v6
 sudo mv /etc/dhcpcd.conf /etc/dhcpcd.conf.orig
 echo "
 interface $ifacepriv
-denyinterfaces $ifacepup
+denyinterfaces $ifacepup $ifacenouse
 nohook wpa_supplicant
 static ip_address=10.7.0.1/24
 static ip6_address=fd00:10:7:1::1/64
@@ -140,7 +141,7 @@ static domain_name_servers=$DNSv4 $DNSv6
 
 sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
 echo "interface=$ifacepriv
-no-dhcp-interface=$ifacepup
+no-dhcp-interface=$ifacepup $ifacenouse
 enable-ra
 listen-address=127.0.0.1
 listen-address=10.7.0.1
