@@ -29,7 +29,7 @@ network={
     ssid="'"${ssidre}"'"
     psk="'"${ssidpasswdre}"'"
     }' | sudo tee --append /etc/wpa_supplicant/wpa_supplicant.conf >> /dev/null
-wpa_cli -i $ifacepup reconfigure
+wpa_cli reconfigure
 sleep 10
 echo
 echo
