@@ -29,8 +29,16 @@ network={
     ssid="'"${ssidre}"'"
     psk="'"${ssidpasswdre}"'"
     }' | sudo tee --append /etc/wpa_supplicant/wpa_supplicant.conf >> /dev/null
-
-
+wpa_cli -i $ifacepup reconfigure
+sleep 10
+echo
+echo
+###test
+read -p "The Puplic AP need a Portal login ? [yn]"  answer3
+if [[ $answer3 = y ]] ; then
+export DISPLAY=:0
+chromium-browser --incognito https://google.com
+###test
 	 exit 1
 fi
 
@@ -86,7 +94,7 @@ echo
 sudo apt update && sudo apt upgrade -y
 sudo echo iptables-persistent iptables-persistent/autosave_v4 boolean true | sudo debconf-set-selections
 sudo echo iptables-persistent iptables-persistent/autosave_v6 boolean true | sudo debconf-set-selections
-sudo apt install dirmngr raspberrypi-kernel-headers dnsmasq hostapd iptables-persistent -y
+sudo apt install dirmngr raspberrypi-kernel-headers dnsmasq hostapd iptables-persistent chromium-browser -y
 sleep 6
 echo "deb http://deb.debian.org/debian/ unstable main" | sudo tee --append /etc/apt/sources.list.d/unstable.list
 sudo apt-key adv --keyserver   keyserver.ubuntu.com --recv-keys 8B48AD6246925553 
@@ -254,10 +262,14 @@ echo "wireguard-pi-gateway installed
 sudo systemctl start dnsmasq
 sudo systemctl enable wg-quick@wg0.service
 wpa_cli -i $ifacepup reconfigure
-
 #############
 #text browser for wifi portal logins  ....
 #############
+read -p "The Puplic AP need a Portal login ? [yn]"  answer2
+if [[ $answer2 = y ]] ; then
+export DISPLAY=:0
+chromium-browser --incognito https://google.com
+fi
 
 echo "reboot your system now"
 echo "check if you need to change your client network settings"
