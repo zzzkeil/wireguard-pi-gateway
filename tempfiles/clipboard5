@@ -54,7 +54,6 @@ ls /sys/class/net
 echo
 if grep -q dtoverlay=pi3-disable-wifi "/boot/config.txt"; then
 echo "pi´s internal WiFi interface is disabled"
-fi
 else
 echo "Disable pi´s internal WiFi interface to avoid conflicts, with other WiFi interfaces ?"
 echo "(if you choose yes, a automatic reboot will follow)"  
@@ -67,6 +66,7 @@ dtoverlay=pi3-disable-wifi
 echo "rebooting now, run the script again !"
 sleep 10
 sudo reboot
+fi
 fi
 echo
 read -p "Your private network interface :  " -e -i eth0 ifacepriv
