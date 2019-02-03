@@ -24,7 +24,6 @@ echo
 read -p "Puplic SSID      :  " -e -i Puplic-WiFi.AP ssidre
 read -p "Puplic Password  :  " -e -i Puplicpasswd ssidpasswdre
 echo '
-
 network={
     ssid="'"${ssidre}"'"
     psk="'"${ssidpasswdre}"'"
