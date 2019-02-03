@@ -2,7 +2,7 @@
 clear
 echo " ####################################################################"
 echo " #  This script is only for Raspbeery Pi stretch   (lite)           #"
-echo " #  You have to prepare your device with drivers passwwords, ect.   #"
+echo " #  You have to prepare your device with drivers passwords, ect.   #"
 echo " #  Check my github site for new versions                           #"
 echo " #  https://github.com/zzzkeil/wireguard-pi-gateway                 #"
 echo " #  Version 0.2 / 03.Feb.2019                                       #"
@@ -29,7 +29,7 @@ if [[ "$EUID" -ne 0 ]]; then
 fi
 
 ####
-echo "Step 01 - already installed / add new AP"
+echo "Step 01 - already installed? / add new AP"
 echo
 echo
 if [[ -e /home/pi/wireguard-pi-gateway.README ]]; then
@@ -50,7 +50,8 @@ echo
 echo "If the Puplic WiFi needs a Portal Login, run /home/pi/portallogin.sh after reboot"
 echo "reboot your pi now"
 exit 1
-fi
+else
+echo " Not installed - continue with next step "
 fi
 echo
 echo
@@ -74,7 +75,10 @@ sudo cp /boot/config.txt /boot/config.txt.orig
 echo "
 dtoverlay=pi3-disable-wifi
 " | sudo tee --append /boot/config.txt > /dev/null
-echo "rebooting now, run the script again, please !"
+echo
+echo "#################################################"
+echo "# rebooting now, run the script again, please ! #"
+echo "#################################################"
 sleep 10
 sudo reboot
 fi
@@ -140,6 +144,8 @@ sudo apt update
 sudo apt install wireguard -y
 sudo systemctl stop dnsmasq
 sudo systemctl stop hostapd
+echo
+echo
 
 ####
 echo "Step 06 - Setup network / iptables"
