@@ -32,9 +32,9 @@ wpa_cli reconfigure
 sleep 10
 echo
 echo
+read -p "The Puplic AP need a Portal login ? [yn]"  answer3
 fi
 ###test
-read -p "The Puplic AP need a Portal login ? [yn]"  answer3
 if [[ $answer3 = y ]]; then
 export DISPLAY=:0
 chromium-browser --incognito https://google.com
