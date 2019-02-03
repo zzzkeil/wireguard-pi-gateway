@@ -23,10 +23,12 @@ echo "Setup puplic network WiFi access"
 echo
 read -p "Puplic SSID      :  " -e -i Puplic-WiFi.AP ssidre
 read -p "Puplic Password  :  " -e -i Puplicpasswd ssidpasswdre
+read -p "Description (your choice):  " -e -i pupwifi2 ssiddesre
 echo '
 network={
     ssid="'"${ssidre}"'"
     psk="'"${ssidpasswdre}"'"
+    id_str="'"${ssiddescre}"'"
     }' | sudo tee --append /etc/wpa_supplicant/wpa_supplicant.conf >> /dev/null
 wpa_cli reconfigure
 echo " Wait 10 sec. for WiFi up "
@@ -38,7 +40,11 @@ fi
 if [[ $answer3 = y ]]; then
 lynx -accept_all_cookies:on https://google.com
 ###test
-echo "reboot your now"
+echo "reboot your pi now"
+exit 1
+else
+echo "reboot your pi now"
+exit 1
 fi
 
 
@@ -87,6 +93,7 @@ echo "Setup puplic network WiFi access"
 echo
 read -p "Puplic SSID      :  " -e -i Puplic-WiFi.AP ssid
 read -p "Puplic Password  :  " -e -i Puplicpasswd ssidpasswd
+read -p "Description (your choice):  " -e -i pupwifi1 ssiddes
 echo
 echo
 echo "Setup wireguard"
@@ -199,6 +206,7 @@ update_config=1
 network={
     ssid="'"${ssid}"'"
     psk="'"${ssidpasswd}"'"
+    id_str="'"${ssiddesc}"'"
     }' | sudo tee --append /etc/wpa_supplicant/wpa_supplicant.conf > /dev/null
 
 
