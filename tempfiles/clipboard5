@@ -52,15 +52,23 @@ echo "List of available interfaces :"
 echo
 ls /sys/class/net
 echo
-echo
-read -p "Disable pi´s internal WiFi interface to avoid conflicts (wlan0) ? [yn]" piwifi
+if grep -q dtoverlay=pi3-disable-wifi "/boot/config.txt"; then
+echo "pi´s internal WiFi interface is disabled"
+fi
+else
+echo "Disable pi´s internal WiFi interface to avoid conflicts (wlan0) ?"
+echo "(if you choose yes, a automatic reboot will follow)"  
+read -p "Disable pi WiFi interface ? [yn]" piwifi
 if [[ $piwifi = y ]]; then
 sudo mv /boot/config.txt /boot/config.txt.orig
 echo "
 dtoverlay=pi3-disable-wifi
 " | sudo tee --append /boot/config.txt > /dev/null
-echo "pi´s internal WiFi/BT interface disabled on next boot"
+echo "rebooting now, run the script again !"
+sleep 10
+sudo reboot
 fi
+echo
 read -p "Your private network interface :  " -e -i eth0 ifacepriv
 read -p "The puplic network interface   :  " -e -i wlan0 ifacepup
 read -p "Unused network interface ?     :  " -e -i wlan1 ifacenouse
