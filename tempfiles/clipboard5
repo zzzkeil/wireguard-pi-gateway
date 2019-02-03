@@ -237,21 +237,7 @@ AllowedIPs = 0.0.0.0/0, ::/0
 sudo sed -i "s@PK03@$(cat /etc/wireguard/keys/wg0)@" /etc/wireguard/wg0.conf
 chmod 600 /etc/wireguard/wg0.conf
 
-echo
-echo
-echo "########################################################################"
-echo
-pupkey=$(cat /etc/wireguard/keys/wg0.pub)
-echo "Set your client data in to your wireguard server config :"
-echo
-echo "[Peer]
-PublicKey = $pupkey
-AllowedIPs = $cipv4/32, $cipv6/128"
-echo
-echo "########################################################################"
-echo
-echo
-echo
+
 
 echo "wireguard-pi-gateway installed
 " | sudo tee --append /pi/wireguard-pi-gateway.README > /dev/null 
@@ -271,6 +257,21 @@ read -p "The Puplic AP need a Portal login ? [yn]"  answer2
 if [[ $answer2 = y ]]; then
 lynx https://google.de
 fi
+echo
+echo
+echo "########################################################################"
+echo
+pupkey=$(cat /etc/wireguard/keys/wg0.pub)
+echo "Set your client data in to your wireguard server config :"
+echo
+echo "[Peer]
+PublicKey = $pupkey
+AllowedIPs = $cipv4/32, $cipv6/128"
+echo
+echo "########################################################################"
+echo
+echo
+echo
 
 echo "reboot your system now"
 echo "check if you need to change your client network settings"
