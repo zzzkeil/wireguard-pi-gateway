@@ -254,7 +254,7 @@ echo
 echo
 
 echo "wireguard-pi-gateway installed
-" > /pi/wireguard-pi-gateway.README
+" | sudo tee --append /pi/wireguard-pi-gateway.README > /dev/null 
 
 ####
 #finish
@@ -262,10 +262,11 @@ echo "wireguard-pi-gateway installed
 sudo systemctl start dnsmasq
 sudo systemctl enable wg-quick@wg0.service
 wpa_cli -i $ifacepup reconfigure
-sleep 10
+sleep 6
 #############
 #text browser for wifi portal logins  ....
 #############
+echo
 read -p "The Puplic AP need a Portal login ? [yn]"  answer2
 if [[ $answer2 = y ]]; then
 lynx https://google.de
