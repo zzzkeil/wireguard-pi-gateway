@@ -1,0 +1,327 @@
+#!/bin/bash
+clear
+echo " ####################################################################"
+echo " #  This script is only for Raspbeery Pi stretch   (lite)           #"
+echo " #  You have to prepare your device with drivers passwords, ect.   #"
+echo " #  Check my github site for new versions                           #"
+echo " #  https://github.com/zzzkeil/wireguard-pi-gateway                 #"
+echo " #  Version 0.2 / 03.Feb.2019                                       #"
+echo " ####################################################################"
+echo " #                                                                  #"
+echo " #         !!! READ THIS  BEFOR YOU RUN THIS SCRIPT !!!             #"
+echo " #                                                                  #"
+echo " ####################################################################"
+echo 
+echo 
+echo "To EXIT this script press  [ENTER]"
+echo 
+read -p "To RUN this script press  [Y]" -n 1 -r
+echo
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+    exit 1
+fi
+
+if [[ "$EUID" -ne 0 ]]; then
+	echo "Sorry, you need to run this as root"
+	exit 1
+fi
+
+####
+echo "Step 01 - already installed? / add new AP"
+echo
+echo
+if [[ -e /home/pi/wireguard-pi-gateway.README ]]; then
+echo "Welcome back, we just set new Puplic AP data, and exit"
+echo
+echo "Setup new puplic network WiFi access"
+echo
+read -p "Puplic SSID      :  " -e -i Puplic-WiFi.AP ssidre
+read -p "Puplic Password  :  " -e -i Puplicpasswd ssidpasswdre
+read -p "Description (your choice):  " -e -i pupwifi2 ssiddesre
+echo '
+network={
+    ssid="'"${ssidre}"'"
+    psk="'"${ssidpasswdre}"'"
+    id_str="'"${ssiddesre}"'"
+    }' | sudo tee --append /etc/wpa_supplicant/wpa_supplicant.conf >> /dev/null
+echo
+echo "If the Puplic WiFi needs a Portal Login, run /home/pi/portallogin.sh after reboot"
+echo "reboot your pi now"
+exit 1
+else
+echo " Not installed - continue with next step "
+fi
+echo
+echo
+
+####
+echo "Step 02 - Setup your interfaces"
+echo
+echo
+echo "List of available interfaces :"
+echo
+ls /sys/class/net
+echo
+if grep -q dtoverlay=pi3-disable-wifi "/boot/config.txt"; then
+echo "pi´s internal WiFi interface is disabled"
+else
+echo "Disable pi´s internal WiFi interface to avoid conflicts, with other WiFi interfaces ?"
+echo "(if you choose yes, a automatic reboot will follow)"  
+read -p "Disable pi WiFi interface ? [yn]" piwifi
+if [[ $piwifi = y ]]; then
+sudo cp /boot/config.txt /boot/config.txt.orig
+echo "
+dtoverlay=pi3-disable-wifi
+" | sudo tee --append /boot/config.txt > /dev/null
+echo
+echo "#################################################"
+echo "# rebooting now, run the script again, please ! #"
+echo "#################################################"
+sleep 10
+sudo reboot
+fi
+fi
+echo
+read -p "Your private network interface :  " -e -i wlan1 ifacepriv
+read -p "The puplic network interface   :  " -e -i wlan0 ifacepup
+read -p "Unused network interface ?     :  " -e -i eth0 ifacenouse
+echo
+echo
+read -p "Is your private network a WiFi interface (your AP) ? [yn]"  answer1
+if [[ $answer1 = y ]]; then
+echo
+aphost=$ifacepriv
+read -p "Your private SSID  :  " -e -i sec.ssid yssid
+read -p "Your password SSID :  " -e -i No.p4ss.WD2 ywpass
+echo
+echo
+fi
+echo
+echo "Setup puplic network WiFi access"
+echo
+read -p "Puplic SSID      :  " -e -i Puplic-WiFi.AP ssid
+read -p "Puplic Password  :  " -e -i Puplicpasswd ssidpasswd
+read -p "Description (your choice):  " -e -i pupwifi1 ssiddes
+echo
+echo
+
+####
+echo "Step 03 - Setup wireguard client"
+echo
+echo
+read -p "Set the Server ipv4 (endpoint) :  " -e -i ServerIP IP01
+read -p "Set the Wireguard Server Port :  " -e -i 54321 wg0port
+read -p "Set the Servers PuplicKey :  " -e -i ServerPupKey PK04
+read -p "Set client ipv4 without /32 :  " -e -i 10.8.0.6 cipv4
+read -p "Set client ipv6 without /128 :  " -e -i fd42:42:42:42::6 cipv6
+read -p "Set client DNS ipv4 :  " -e -i 10.8.0.1 DNSv4
+read -p "Set client DNS ipv6 :  " -e -i fd42:42:42:42::1 DNSv6
+echo
+echo
+####
+echo "Step 04 - Setup SSH access on $ifacepriv"
+echo
+echo
+read -p "Whats your SSH Port (default 22) :  " -e -i 22 defssh
+echo
+echo
+
+####
+echo "Step 05 - install stuff"
+echo
+echo
+sudo apt update && sudo apt upgrade -y
+sudo echo iptables-persistent iptables-persistent/autosave_v4 boolean true | sudo debconf-set-selections
+sudo echo iptables-persistent iptables-persistent/autosave_v6 boolean true | sudo debconf-set-selections
+sudo apt install dirmngr raspberrypi-kernel-headers dnsmasq hostapd iptables-persistent lynx -y
+sleep 6
+echo "deb http://deb.debian.org/debian/ unstable main" | sudo tee --append /etc/apt/sources.list.d/unstable.list
+sudo apt-key adv --keyserver   keyserver.ubuntu.com --recv-keys 8B48AD6246925553 
+printf 'Package: *\nPin: release a=unstable\nPin-Priority: 150\n' | sudo tee --append /etc/apt/preferences.d/limit-unstable
+sudo apt update
+sudo apt install wireguard -y
+sudo systemctl stop dnsmasq
+sudo systemctl stop hostapd
+echo
+echo
+
+####
+echo "Step 06 - Setup network / iptables"
+echo
+echo
+sudo cp /etc/sysctl.conf /etc/sysctl.conf.orig
+sudo sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
+sudo sed -i 's/#net.ipv6.conf.all.forwarding=1/net.ipv6.conf.all.forwarding=1/g' /etc/sysctl.conf
+echo "net.ipv6.conf.all.autoconf=0
+net.ipv6.conf.eth0.autoconf=0" | sudo tee --append /etc/sysctl.conf > /dev/null
+
+#Puplic interface
+sudo iptables -A INPUT -i $ifacepup -m state --state ESTABLISHED,RELATED -j ACCEPT
+sudo iptables -A INPUT -i $ifacepup  -p tcp --dport $defssh -m state --state NEW -j DROP
+sudo iptables -A OUTPUT -o $ifacepup -p tcp --sport $defssh -m state --state NEW -j DROP
+sudo iptables -A INPUT -i ifacepup -j DROP
+#v6
+sudo ip6tables -A INPUT -i $ifacepup -m state --state ESTABLISHED,RELATED -j ACCEPT
+sudo ip6tables -A INPUT -i $ifacepup  -p tcp --dport $defssh -m state --state NEW -j DROP
+sudo ip6tables -A OUTPUT -o $ifacepup -p tcp --sport $defssh -m state --state NEW -j DROP
+sudo ip6tables -A INPUT -i ifacepup -j DROP
+
+#Private interface
+sudo iptables -A INPUT -i $ifacepriv  -p tcp --dport $defssh -m state --state NEW,ESTABLISHED -j ACCEPT
+sudo iptables -A OUTPUT -o $ifacepriv -p tcp --sport $defssh -m state --state ESTABLISHED -j ACCEPT
+#v6
+sudo ip6tables -A INPUT -i $ifacepriv  -p tcp --dport $defssh -m state --state NEW,ESTABLISHED -j ACCEPT
+sudo ip6tables -A OUTPUT -o $ifacepriv -p tcp --sport $defssh -m state --state ESTABLISHED -j ACCEPT
+
+#
+sudo iptables -t nat -A POSTROUTING -o $ifacepriv -j MASQUERADE
+sudo iptables -t nat -A POSTROUTING -o $ifacepup -j MASQUERADE
+sudo iptables -t nat -A POSTROUTING -o wg0 -j MASQUERADE
+sudo iptables -A FORWARD -i wg0 -o wg0 -m conntrack --ctstate NEW -j ACCEPT
+sudo ip6tables -t nat -A POSTROUTING -o $ifacepriv -j MASQUERADE
+sudo ip6tables -t nat -A POSTROUTING -o $ifacepup -j MASQUERADE
+sudo ip6tables -t nat -A POSTROUTING -o wg0 -j MASQUERADE
+sudo ip6tables -A FORWARD -i wg0 -o wg0 -m conntrack --ctstate NEW -j ACCEPT
+sudo iptables-save > /etc/iptables/rules.v4
+sudo ip6tables-save > /etc/iptables/rules.v6
+echo
+echo
+
+####
+echo "Step 07 - Setup config files"
+echo
+echo
+sudo mv /etc/dhcpcd.conf /etc/dhcpcd.conf.orig
+echo "
+interface $ifacepriv
+denyinterfaces $ifacepup $ifacenouse
+nohook wpa_supplicant
+static ip_address=10.7.0.1/24
+static ip6_address=fd00:10:7:1::1/64
+static domain_name_servers=$DNSv4 $DNSv6
+" | sudo tee --append /etc/dhcpcd.conf > /dev/null
+
+sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
+echo "interface=$ifacepriv
+no-dhcp-interface=$ifacepup,$ifacenouse
+enable-ra
+listen-address=127.0.0.1
+listen-address=10.7.0.1
+listen-address=::1
+listen-address=fd00:10:7:1::1
+dhcp-range=fd00:10:7:1::2,fd00:10:7:1::52,24h
+dhcp-range=10.7.0.2,10.7.0.52,24h
+dhcp-option=option:dns-server,$DNSv4
+dhcp-option=option6:dns-server,[$DNSv6]
+dhcp-option=option:router,10.7.0.1
+"  | sudo tee --append /etc/dnsmasq.conf > /dev/null
+
+echo '
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+network={
+    ssid="'"${ssid}"'"
+    psk="'"${ssidpasswd}"'"
+    id_str="'"${ssiddes}"'"
+    }' | sudo tee --append /etc/wpa_supplicant/wpa_supplicant.conf > /dev/null
+
+
+if [[ $answer1 = y ]]; then
+#######
+echo "
+DAEMON_CONF="/etc/hostapd/hostapd.conf"
+" | sudo tee --append /etc/default/hostapd > /dev/null
+#######
+echo "
+interface=$aphost
+#driver=yourchoice
+ssid=$yssid
+hw_mode=g
+channel=6
+wmm_enabled=0
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+wpa=2
+wpa_passphrase=$ywpass
+wpa_key_mgmt=WPA-PSK
+wpa_pairwise=TKIP
+rsn_pairwise=CCMP
+" | sudo tee --append /etc/hostapd/hostapd.conf > /dev/null
+#######
+fi
+echo
+echo
+
+####
+echo "Step 08 - Setup wireguard config file"
+echo
+echo
+sudo mkdir /etc/wireguard/keys
+sudo chmod 700 /etc/wireguard/keys
+sudo touch /etc/wireguard/keys/wg0
+sudo chmod 600 /etc/wireguard/keys/wg0
+sudo wg genkey > /etc/wireguard/keys/wg0
+sudo wg pubkey < /etc/wireguard/keys/wg0 > /etc/wireguard/keys/wg0.pub
+
+echo "[Interface]
+Address = $cipv4/32
+Address = $cipv6/128
+PrivateKey = PK03
+DNS = $DNSv4, DNSv6
+
+[Peer]
+Endpoint = $IP01:$wg0port
+PublicKey = $PK04
+AllowedIPs = 0.0.0.0/0, ::/0
+" | sudo tee --append /etc/wireguard/wg0.conf > /dev/null
+sudo sed -i "s@PK03@$(cat /etc/wireguard/keys/wg0)@" /etc/wireguard/wg0.conf
+chmod 600 /etc/wireguard/wg0.conf
+echo
+echo
+
+####
+echo "Step 90 - create needed files for reconfig"
+echo
+echo
+echo "wireguard-pi-gateway installed
+" | sudo tee --append /home/pi/wireguard-pi-gateway.README > /dev/null 
+
+echo '#!/bin/bash
+echo "You need to login to the WiFi Network over a Portal ?!"
+echo "Press Y to start or something else to leave"
+read -p "Start lynx browser  [Y]" -n 1 -r
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+    exit 1
+fi
+lynx -accept_all_cookies:on https://google.com
+' | sudo tee --append /home/pi/portallogin.sh > /dev/null 
+sudo chmod +x /home/pi/portallogin.sh
+
+####
+echo "Step 100 - finish"
+echo
+echo
+sudo systemctl start dnsmasq
+sudo systemctl enable wg-quick@wg0.service
+echo
+echo
+echo "########################################################################"
+echo
+pupkey=$(cat /etc/wireguard/keys/wg0.pub)
+echo "Set your client data in to your wireguard server config :"
+echo
+echo "[Peer]
+PublicKey = $pupkey
+AllowedIPs = $cipv4/32, $cipv6/128"
+echo
+echo "########################################################################"
+echo
+echo
+echo
+echo "If the Puplic WiFi needs a Portal Login, run sudo ./portallogin.sh after reboot"
+echo "reboot your system now"
+echo "check if you need to change your client network settings"
