@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "do not run this script  now !!"
-echo 
+echo
 read -p "To RUN this script press  [Y]" -n 1 -r
 echo
 echo
@@ -32,14 +32,15 @@ wpa_cli reconfigure
 sleep 10
 echo
 echo
+fi
 ###test
 read -p "The Puplic AP need a Portal login ? [yn]"  answer3
-if [[ $answer3 = y ]] ; then
+if [[ $answer3 = y ]]; then
 export DISPLAY=:0
 chromium-browser --incognito https://google.com
 ###test
-	 exit 1
 fi
+ exit 1
 
 ####
 #options
@@ -58,7 +59,7 @@ read -p "Unused network interface ?     :  " -e -i wlan1 ifacenouse
 echo
 echo
 read -p "Is your private network a WiFi interface (your AP) ? [yn]"  answer1
-if [[ $answer1 = y ]] ; then
+if [[ $answer1 = y ]]; then
 echo
 aphost=$ifacepriv
 read -p "Your private SSID  :  " -e -i sec.ssid yssid
@@ -185,7 +186,7 @@ network={
     }' | sudo tee --append /etc/wpa_supplicant/wpa_supplicant.conf > /dev/null
 
 
-if [[ $answer1 = y ]] ; then
+if [[ $answer1 = y ]]; then
 #######
 echo "
 DAEMON_CONF="/etc/hostapd/hostapd.conf"
@@ -265,7 +266,7 @@ wpa_cli -i $ifacepup reconfigure
 #text browser for wifi portal logins  ....
 #############
 read -p "The Puplic AP need a Portal login ? [yn]"  answer2
-if [[ $answer2 = y ]] ; then
+if [[ $answer2 = y ]]; then
 export DISPLAY=:0
 chromium-browser --incognito https://google.com
 fi
