@@ -15,7 +15,7 @@ if [[ "$EUID" -ne 0 ]]; then
 	exit 1
 fi
 
-if [[ -e /pi/wireguard-pi-gateway.README ]]; then
+if [[ -e /home/pi/wireguard-pi-gateway.README ]]; then
 echo "Welcome back, we just set new Puplic AP data, and exit"
 echo "reboot your PI after exit"
 echo
@@ -29,14 +29,14 @@ network={
     psk="'"${ssidpasswdre}"'"
     }' | sudo tee --append /etc/wpa_supplicant/wpa_supplicant.conf >> /dev/null
 wpa_cli reconfigure
+echo " Wait 10 sec. for WiFi up "
 sleep 10
-echo
 echo
 read -p "The Puplic AP need a Portal login ? [yn]"  answer3
 fi
 ###test
 if [[ $answer3 = y ]]; then
-lynx https://google.com
+lynx -accept_all_cookies:on https://google.com
 ###test
 echo "reboot your now"
 fi
@@ -240,7 +240,7 @@ chmod 600 /etc/wireguard/wg0.conf
 
 
 echo "wireguard-pi-gateway installed
-" | sudo tee --append /pi/wireguard-pi-gateway.README > /dev/null 
+" | sudo tee --append /home/pi/wireguard-pi-gateway.README > /dev/null 
 
 ####
 #finish
@@ -248,14 +248,15 @@ echo "wireguard-pi-gateway installed
 sudo systemctl start dnsmasq
 sudo systemctl enable wg-quick@wg0.service
 wpa_cli -i $ifacepup reconfigure
-sleep 6
+echo " Wait 10 sec. for WiFi up "
+sleep 10
 #############
 #text browser for wifi portal logins  ....
 #############
 echo
 read -p "The Puplic AP need a Portal login ? [yn]"  answer2
 if [[ $answer2 = y ]]; then
-lynx https://google.de
+lynx -accept_all_cookies:on https://google.com
 fi
 echo
 echo
