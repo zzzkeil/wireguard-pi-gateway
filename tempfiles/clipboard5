@@ -28,7 +28,7 @@ echo '
 network={
     ssid="'"${ssidre}"'"
     psk="'"${ssidpasswdre}"'"
-    id_str="'"${ssiddescre}"'"
+    id_str="'"${ssiddesre}"'"
     }' | sudo tee --append /etc/wpa_supplicant/wpa_supplicant.conf >> /dev/null
 wpa_cli reconfigure
 echo " Wait 10 sec. for WiFi up "
@@ -206,7 +206,7 @@ update_config=1
 network={
     ssid="'"${ssid}"'"
     psk="'"${ssidpasswd}"'"
-    id_str="'"${ssiddesc}"'"
+    id_str="'"${ssiddes}"'"
     }' | sudo tee --append /etc/wpa_supplicant/wpa_supplicant.conf > /dev/null
 
 
