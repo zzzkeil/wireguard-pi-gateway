@@ -38,8 +38,9 @@ fi
 if [[ $answer3 = y ]]; then
 lynx https://google.com
 ###test
+echo "reboot your now"
 fi
- exit 1
+
 
 ####
 #options
